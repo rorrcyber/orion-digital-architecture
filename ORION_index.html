@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORION Digital Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@200;400;600;800&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060d1a;
+    --bg2: #0a1628;
+    --blue: #00a8ff;
+    --blue-dim: #0066cc;
+    --cyan: #00e5ff;
+    --gold: #d4af37;
+    --white: #e8f0f8;
+    --muted: #4a6080;
+    --border: rgba(0,168,255,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── CANVAS BACKGROUND ── */
+  #canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  .content { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,13,26,0.85);
+  }
+
+  .nav-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--blue);
+    letter-spacing: 0.2em;
+  }
+
+  .nav-logo span { color: var(--gold); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    font-weight: 600;
+  }
+
+  .nav-links a:hover { color: var(--blue); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 4rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--blue);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+
+  .hero-tag::before {
+    content: '> ';
+    color: var(--gold);
+  }
+
+  .hero h1 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.4s;
+  }
+
+  .hero h1 .orion {
+    color: var(--white);
+    display: block;
+  }
+
+  .hero h1 .digital {
+    color: var(--blue);
+    display: block;
+  }
+
+  .hero h1 .arch {
+    color: var(--muted);
+    display: block;
+    font-weight: 200;
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    font-weight: 400;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.6s;
+  }
+
+  .hero-sub strong { color: var(--blue); font-weight: 600; }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: #000;
+    padding: 0.9rem 2.5rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .btn-primary:hover {
+    background: var(--cyan);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--blue);
+    padding: 0.9rem 2.5rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--blue);
+    background: rgba(0,168,255,0.05);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    gap: 4rem;
+    background: rgba(0,168,255,0.03);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .stat-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 2rem;
+    color: var(--blue);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 4rem;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: var(--white);
+  }
+
+  .section-title span { color: var(--blue); }
+
+  /* ── CAPABILITIES GRID ── */
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .cap-card {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    background: rgba(0,168,255,0.03);
+    position: relative;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+
+  .cap-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 16px; height: 16px;
+    border-left: 1px solid var(--blue);
+    border-bottom: 1px solid var(--blue);
+    transform: translate(0, 0);
+  }
+
+  .cap-card:hover {
+    border-color: rgba(0,168,255,0.5);
+    background: rgba(0,168,255,0.06);
+    transform: translateY(-4px);
+  }
+
+  .cap-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--blue);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  .cap-title {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+
+  .cap-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  .cap-list {
+    list-style: none;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .cap-list li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding-left: 1rem;
+    position: relative;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 400;
+  }
+
+  .cap-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-size: 0.7rem;
+  }
+
+  /* ── PHASE TRACKER ── */
+  .phase-track {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem 2rem;
+    border: 1px solid var(--border);
+    background: rgba(0,168,255,0.02);
+    transition: all 0.2s;
+  }
+
+  .phase:hover { border-color: rgba(0,168,255,0.4); }
+
+  .phase-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .phase-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--white);
+    margin-bottom: 0.25rem;
+  }
+
+  .phase-detail {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .phase-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.8rem;
+    white-space: nowrap;
+  }
+
+  .badge-complete {
+    color: #00e676;
+    border: 1px solid rgba(0,230,118,0.4);
+    background: rgba(0,230,118,0.05);
+  }
+
+  .badge-progress {
+    color: var(--blue);
+    border: 1px solid var(--border);
+    background: rgba(0,168,255,0.05);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .badge-planned {
+    color: var(--muted);
+    border: 1px solid rgba(74,96,128,0.4);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ── FOUNDER ── */
+  .founder-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .founder-text h2 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .founder-text h2 span { color: var(--blue); }
+
+  .founder-text p {
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .founder-creds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .cred {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .cred::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .founder-visual {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 2;
+    background: rgba(0,168,255,0.02);
+  }
+
+  .terminal-line { display: block; }
+  .t-prompt { color: var(--blue); }
+  .t-cmd { color: var(--white); }
+  .t-out { color: #00e676; }
+  .t-muted { color: var(--muted); }
+  .t-gold { color: var(--gold); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  footer a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 4rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── GLOW LINE ── */
+  .glow-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="content">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">ORION<span>://</span>DIGITAL</div>
+    <ul class="nav-links">
+      <li><a href="#capabilities">Capabilities</a></li>
+      <li><a href="#phases">Roadmap</a></li>
+      <li><a href="#founder">Founder</a></li>
+      <li><a href="https://linkedin.com/in/richard-orr-94098382" target="_blank">Connect</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="hero">
+      <p class="hero-tag">AI-Powered Security & Productivity Platform // April 2026</p>
+      <h1>
+        <span class="orion">ORION</span>
+        <span class="digital">DIGITAL</span>
+        <span class="arch">ARCHITECTURE</span>
+      </h1>
+      <p class="hero-sub">
+        An autonomous AI platform that handles <strong>job search automation</strong>,
+        <strong>email intelligence</strong>, <strong>calendar operations</strong>,
+        and <strong>SOC security monitoring</strong> — all piped through a
+        Wazuh audit pipeline so every action is logged, monitored, and reviewable.
+      </p>
+      <div class="hero-actions">
+        <a href="#capabilities" class="btn-primary">Explore Capabilities</a>
+        <a href="https://linkedin.com/in/richard-orr-94098382" target="_blank" class="btn-secondary">Connect with Founder</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num">11</span>
+      <span class="stat-label">Security Tools Integrated</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">5</span>
+      <span class="stat-label">Development Phases</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">Phase 1</span>
+      <span class="stat-label">Complete & Deployed</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">100%</span>
+      <span class="stat-label">Audit Logged</span>
+    </div>
+  </div>
+
+  <!-- CAPABILITIES -->
+  <section id="capabilities">
+    <p class="section-tag">// Core Modules</p>
+    <h2 class="section-title">What <span>ORION</span> Does</h2>
+    <div class="cap-grid">
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_01 // JOB_INTEL</div>
+        <div class="cap-title">Job Search Automation</div>
+        <ul class="cap-list">
+          <li>Scans Indeed, LinkedIn & USAJobs RSS feeds continuously</li>
+          <li>Scores postings against your resume automatically</li>
+          <li>Drafts tailored cover letters in your voice</li>
+          <li>Tracks applications, follow-ups & recruiter contacts</li>
+          <li>Flags roles about to expire or repeatedly reposted</li>
+        </ul>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_02 // EMAIL_INT</div>
+        <div class="cap-title">Email Intelligence</div>
+        <ul class="cap-list">
+          <li>Scans Gmail & Outlook every 15 minutes</li>
+          <li>Auto-categorizes: recruiter, urgent, action needed</li>
+          <li>Drafts replies in your voice and tone</li>
+          <li>Surfaces buried leads you forgot about</li>
+          <li>Auto-unsubscribes from junk and marketing</li>
+        </ul>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_03 // CAL_OPS</div>
+        <div class="cap-title">Calendar & Interview Prep</div>
+        <ul class="cap-list">
+          <li>Morning brief: schedule, priorities, top job leads</li>
+          <li>Pre-loads company research before every interview</li>
+          <li>Generates likely questions and talking points</li>
+          <li>Blocks focus time around scheduled commitments</li>
+          <li>Reminds follow-ups from open email threads</li>
+        </ul>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_04 // SOC_PIPE</div>
+        <div class="cap-title">SOC Security Integration</div>
+        <ul class="cap-list">
+          <li>All agent activity piped into Wazuh SOC pipeline</li>
+          <li>Alerts on unexpected behavior or unusual API calls</li>
+          <li>Weekly activity reports — everything ORION did</li>
+          <li>Detects API key misuse & unauthorized access</li>
+          <li>Full audit trail — every action logged & reviewable</li>
+        </ul>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_05 // INTEL_OPS</div>
+        <div class="cap-title">Intelligence Gathering</div>
+        <ul class="cap-list">
+          <li>Researches companies and hiring managers pre-interview</li>
+          <li>Monitors when target companies post new roles</li>
+          <li>Tracks salary trends for your target positions</li>
+          <li>Builds recruiter outreach lists overnight</li>
+        </ul>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">MODULE_06 // LIFE_OPS</div>
+        <div class="cap-title">Personal Operations</div>
+        <ul class="cap-list">
+          <li>Daily briefing — weather, schedule, priorities</li>
+          <li>GRC compliance deadline monitoring</li>
+          <li>Study session scheduling & exam alerts</li>
+          <li>VPS health and container uptime monitoring</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- PHASES -->
+  <section id="phases">
+    <p class="section-tag">// Development Roadmap</p>
+    <h2 class="section-title">Build <span>Status</span></h2>
+    <div class="phase-track">
+
+      <div class="phase">
+        <span class="phase-num">PHASE_01</span>
+        <div>
+          <div class="phase-name">Core Infrastructure</div>
+          <div class="phase-detail">Docker container, Claude API integration, job report generation</div>
+        </div>
+        <span class="phase-badge badge-complete">✓ COMPLETE</span>
+      </div>
+
+      <div class="phase">
+        <span class="phase-num">PHASE_02</span>
+        <div>
+          <div class="phase-name">Email Intelligence</div>
+          <div class="phase-detail">Gmail + Outlook OAuth2, inbox scanning, AI email drafting</div>
+        </div>
+        <span class="phase-badge badge-progress">⬡ IN PROGRESS</span>
+      </div>
+
+      <div class="phase">
+        <span class="phase-num">PHASE_03</span>
+        <div>
+          <div class="phase-name">Calendar & Briefing Automation</div>
+          <div class="phase-detail">Google Calendar integration, morning briefing, interview prep automation</div>
+        </div>
+        <span class="phase-badge badge-planned">○ PLANNED</span>
+      </div>
+
+      <div class="phase">
+        <span class="phase-num">PHASE_04</span>
+        <div>
+          <div class="phase-name">Job Board Automation</div>
+          <div class="phase-detail">Multi-board scraping, application tracking, automated submission</div>
+        </div>
+        <span class="phase-badge badge-planned">○ PLANNED</span>
+      </div>
+
+      <div class="phase">
+        <span class="phase-num">PHASE_05</span>
+        <div>
+          <div class="phase-name">Oracle Cloud & Full SOC Deployment</div>
+          <div class="phase-detail">Enterprise cloud deployment, complete Wazuh integration, production monitoring</div>
+        </div>
+        <span class="phase-badge badge-planned">○ PLANNED</span>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- FOUNDER -->
+  <section id="founder">
+    <div class="founder-block">
+      <div class="founder-text">
+        <p class="section-tag">// The Founder</p>
+        <h2>Built by a <span>SOC Analyst</span> who got tired of waiting.</h2>
+        <p>
+          ORION was built out of necessity. After years running security operations across 500+ endpoints,
+          I applied the same systems thinking I use in the SOC to my own job search — and realized
+          the entire process could be automated, monitored, and secured.
+        </p>
+        <p>
+          Before cybersecurity, I spent 20 years as an executive chef running high-pressure kitchens.
+          Triage. Documentation. Clear communication under stress. Turns out that's exactly what
+          security operations looks like. ORION is what happens when both worlds collide.
+        </p>
+        <div class="founder-creds">
+          <div class="cred">Richard D. Orr Sr. — Founder</div>
+          <div class="cred">SOC Analyst | ISSO | CompTIA Security+</div>
+          <div class="cred">NIST SP 800-53 | RMF | FISMA</div>
+          <div class="cred">Wazuh · Splunk · Velociraptor · Kali Linux</div>
+          <div class="cred">Washington DC-Baltimore Area</div>
+        </div>
+      </div>
+
+      <div class="founder-visual">
+        <span class="terminal-line"><span class="t-prompt">orion@soc</span>:~$ ./status.sh</span>
+        <span class="terminal-line t-muted">────────────────────────────</span>
+        <span class="terminal-line"><span class="t-gold">ORION</span> v0.2.0 — Phase 2 Active</span>
+        <span class="terminal-line t-muted"> </span>
+        <span class="terminal-line"><span class="t-out">✓</span> Docker containers: running</span>
+        <span class="terminal-line"><span class="t-out">✓</span> Claude API: connected</span>
+        <span class="terminal-line"><span class="t-out">✓</span> Wazuh pipeline: active</span>
+        <span class="terminal-line"><span class="t-out">✓</span> Job reports: generating</span>
+        <span class="terminal-line t-muted"> </span>
+        <span class="terminal-line"><span class="t-prompt">⬡</span> Gmail OAuth2: in progress</span>
+        <span class="terminal-line"><span class="t-prompt">⬡</span> Inbox scanner: building</span>
+        <span class="terminal-line t-muted"> </span>
+        <span class="terminal-line t-muted">────────────────────────────</span>
+        <span class="terminal-line"><span class="t-prompt">orion@soc</span>:~$ <span class="t-cmd">_</span></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="glow-line"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>ORION DIGITAL ARCHITECTURE © 2026 — FOUNDED BY RICHARD D. ORR SR.</span>
+    <span>
+      <a href="https://linkedin.com/in/richard-orr-94098382" target="_blank">LINKEDIN</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:rorrcyber@outlook.com">CONTACT</a>
+    </span>
+  </footer>
+
+</div>
+
+<!-- CIRCUIT CANVAS -->
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const nodes = [];
+const CELL = 60;
+
+function init() {
+  nodes.length = 0;
+  const cols = Math.ceil(canvas.width / CELL) + 1;
+  const rows = Math.ceil(canvas.height / CELL) + 1;
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      if (Math.random() > 0.7) {
+        nodes.push({
+          x: i * CELL + (Math.random() - 0.5) * 20,
+          y: j * CELL + (Math.random() - 0.5) * 20,
+          pulse: Math.random(),
+          speed: 0.005 + Math.random() * 0.01,
+          active: Math.random() > 0.6
+        });
+      }
+    }
+  }
+}
+init();
+
+function draw(t) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,100,160,0.08)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < canvas.width; x += CELL) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += CELL) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+
+  // Connections
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[j].x - nodes[i].x;
+      const dy = nodes[j].y - nodes[i].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < CELL * 1.8 && nodes[i].active && nodes[j].active) {
+        const alpha = (1 - dist / (CELL * 1.8)) * 0.3;
+        ctx.strokeStyle = `rgba(0,168,255,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        // Circuit-style: horizontal then vertical
+        ctx.lineTo(nodes[j].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Nodes
+  nodes.forEach(n => {
+    n.pulse += n.speed;
+    const p = (Math.sin(n.pulse + t * 0.001) + 1) / 2;
+    if (n.active) {
+      ctx.fillStyle = `rgba(0,168,255,${0.4 + p * 0.4})`;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 2 + p, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(0,60,120,0.3)';
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+
+</body>
+</html>
